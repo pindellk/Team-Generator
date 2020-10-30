@@ -12,6 +12,7 @@ const render = require("./lib/htmlRenderer");
 
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)
+const employeeList = [];
 
 const questions = [
     {
@@ -38,41 +39,73 @@ const questions = [
     }
 ];
 
-inquirer
-    .prompt(questions)
-    .then((answers) => {
-        if (answers.role === "Manager") {
-            inquirer.prompt({
-                type: "number",
-                name: "officeNumber",
-                message: "What is your office number?",
-                validate: val => /[1-9]/gi.test(val),
-            }).then((answer) => {
-                Object.assign(answers, answer);
-                const manager = new Manager(answers.name, answers.id, answers.email, answers.officeNumber, answers.role);
-            });
-        }
-        if (answers.role === "Engineer") {
-            inquirer.prompt({
-                type: "input",
-                name: "github",
-                message: "What is your GitHub account?"
-            }).then((answer) => {
-                Object.assign(answers, answer);
-                const engineer = new Engineer(answers.name, answers.id, answers.email, answers.github, answers.role);
-            });
-        }
-        if (answers.role === "Intern") {
-            inquirer.prompt({
-                type: "input",
-                name: "school",
-                message: "What is your school?"
-            }).then((answer) => {
-                Object.assign(answers, answer);
-                const intern = new Intern(answers.name, answers.id, answers.email, answers.school, answers.role);
-            });
-        }
-    });
+const managerQuestion = {
+    type: "number",
+    name: "officeNumber",
+    message: "What is your office number?",
+    validate: val => /[1-9]/gi.test(val),
+}
+
+const engineerQuestion = {
+    type: "input",
+    name: "github",
+    message: "What is your github account?"
+}
+
+const internQuestion = {
+    type: "input",
+    name: "school",
+    message: "What is your school?"
+}
+
+const additionalEmployee = {
+    type: "confirm",
+    name: "add",
+    message: "Would you like to enter more employees?"
+}
+
+function addEmployee() {
+    inquirer
+        .prompt(questions)
+        .then((answers) => {
+            let nextQuestion;
+            if (answers.role === "Manager") {
+                nextQuestion = managerQuestion;
+            }
+            if (answers.role === "Engineer") {
+                nextQuestion = engineerQuestion;
+            }
+            if (answers.role === "Intern") {
+                nextQuestion = internQuestion;
+            }
+            inquirer
+                .prompt(nextQuestion)
+                .then((answer) => {
+                    Object.assign(answers, answer);
+                    let employee;
+                    if (answers.role === "Manager") {
+                        employee = new Manager(answers.name, answers.id, answers.email, answers.officeNumber);
+                    }
+                    if (answers.role === "Intern") {
+                        employee = new Intern(answers.name, answers.id, answers.email, answers.school);
+                    }
+                    if (answers.role === "Engineer") {
+                        employee = new Engineer(answers.name, answers.id, answers.email, answers.github);
+                    }
+                    employeeList.push(employee);
+                    inquirer
+                        .prompt(additionalEmployee)
+                        .then((answer) => {
+                            if (answer.add === true) {
+                                addEmployee();
+                            }
+                        })
+                    console.log(employeeList);
+                })
+        })
+}
+
+addEmployee();
 
 // After the user has input all employees desired, call the `render` function (required
 // above) and pass in an array containing all employee objects; the `render` function will
@@ -97,3 +130,14 @@ inquirer
 // for further information. Be sure to test out each class and verify it generates an
 // object with the correct structure and methods. This structure will be crucial in order
 // for the provided `render` function to work! ```
+
+// function addEngineer(answers) {
+//     inquirer.prompt({
+//         type: "input",
+//         name: "github",
+//         message: "What is your GitHub account?"
+//     }).then((answer) => {
+//         Object.assign(answers, answer);
+//         const engineer = new Engineer(answers.name, answers.id, answers.email, answers.github, answers.role);
+//     });
+// }
