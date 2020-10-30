@@ -10,13 +10,77 @@ const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
 
-
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)
+
+const questions = [
+    {
+        type: "input",
+        name: "name",
+        message: "What is your name?",
+    },
+    {
+        type: "number",
+        name: "id",
+        message: "What is your ID?",
+        validate: val => /[1-9]/gi.test(val),
+    },
+    {
+        type: "input",
+        name: "email",
+        message: "What is your email?",
+    },
+    {
+        type: "list",
+        name: "role",
+        message: "What is your role?",
+        choices: ["Manager", new inquirer.Separator(), "Engineer", new inquirer.Separator(), "Intern"]
+    }
+];
+
+inquirer
+    .prompt(questions)
+    .then((answers) => {
+        if (answers.role === "Manager") {
+            inquirer.prompt({
+                type: "number",
+                name: "officeNumber",
+                message: "What is your office number?",
+                validate: val => /[1-9]/gi.test(val),
+            }).then((answer) => {
+                Object.assign(answers, answer);
+                const manager = new Manager(answers.name, answers.id, answers.email, answers.officeNumber, answers.role);
+            });
+        }
+        if (answers.role === "Engineer") {
+            inquirer.prompt({
+                type: "input",
+                name: "github",
+                message: "What is your GitHub account?"
+            }).then((answer) => {
+                Object.assign(answers, answer);
+                const engineer = new Engineer(answers.name, answers.id, answers.email, answers.github, answers.role);
+            });
+        }
+        if (answers.role === "Intern") {
+            inquirer.prompt({
+                type: "input",
+                name: "school",
+                message: "What is your school?"
+            }).then((answer) => {
+                Object.assign(answers, answer);
+                const intern = new Intern(answers.name, answers.id, answers.email, answers.school, answers.role);
+            });
+        }
+    });
 
 // After the user has input all employees desired, call the `render` function (required
 // above) and pass in an array containing all employee objects; the `render` function will
 // generate and return a block of HTML including templated divs for each employee!
+
+
+// render()
+
 
 // After you have your html, you're now ready to create an HTML file using the HTML
 // returned from the `render` function. Now write it to a file named `team.html` in the
